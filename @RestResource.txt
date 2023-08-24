@@ -1,0 +1,51 @@
+@RestResource(urlMapping='/AccountAPI/*')
+global with sharing class AccountAPIResource {
+
+    @HttpPost
+    global static String createAccount(String name, String phoneNumber, String emailAddress, String residentialAddress) {
+        Account newAccount = new Account(
+            Name = name,
+            Phone = phoneNumber,
+            Email__c = emailAddress,
+            Residential_Address__c = residentialAddress
+        );
+        insert newAccount;
+        return newAccount.id;
+    }
+    
+    @HttpGet
+    global static Account getAccountById() {
+        String accountId = RestContext.request.requestURI.substringAfterLast('/');
+        return [SELECT id, Name, Phone, Email__c, Residential_Address__c FROM Account WHERE id = :accountId LIMIT 1];
+    }
+
+    @HttpPut
+    global static String updateAccount( String name, String phoneNumber, String emailAddress, String residentialAddress) {
+        String accountId = RestContext.request.requestURI.substringAfterLast('/');
+        Account accToUpdate = new Account(id = accountId);
+        
+        if (name != null) {
+            accToUpdate.Name = name;
+        }
+        if (phoneNumber != null) {
+            accToUpdate.Phone = phoneNumber;
+        }
+        if (emailAddress != null) {
+            accToUpdate.Email__c = emailAddress;
+        }
+        if (residentialAddress != null) {
+            accToUpdate.Residential_Address__c = residentialAddress;
+        }
+        
+        update accToUpdate;
+        return 'Account updated successfully';
+    }
+      @HttpDelete
+    global static String deleteAccount() {
+        String accountId = RestContext.request.requestURI.substringAfterLast('/');
+        Account accToDelete = new Account(id = accountId);
+        
+        delete accToDelete;
+        return 'Account deleted successfully';
+    }
+}
